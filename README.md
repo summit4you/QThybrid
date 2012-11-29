@@ -5,7 +5,7 @@ QT hybrid . You can use HTML5 write C++ Application
 
 follow htmapp project. And I use CMAKE to republic.
 
-The Orign URL is : ![htmapp](http://code.google.com/p/htmapp/)
+The Orign URL is : [htmapp](http://code.google.com/p/htmapp/)
 
 Thanks to Robert Umbehant
 
@@ -176,14 +176,14 @@ LICENSE
 中文说明
 =======
 
-本文参考 Robert Umbehant 的源代码，文章参见这里[英文](http://www.codeproject.com/Articles/336018/Building-C-Applications-with-HTML5), (中文)[http://scriptogr.am/bee/post/building-c-applications-with-html5]。 采用CMake对源代码进行重构，对源代码进行适当修正以支持VC编译。已在VC2008编译通过。
+本文参考 Robert Umbehant 的源代码，文章参见这里[英文](http://www.codeproject.com/Articles/336018/Building-C-Applications-with-HTML5), [中文](http://scriptogr.am/bee/post/building-c-applications-with-html5)。 采用CMake对源代码进行重构，对源代码进行适当修正以支持VC编译。已在VC2008编译通过。
 
 用法如下：
 
 - 使用html5开发ui，并嵌入C++代码，具体参见[原文](http://www.codeproject.com/Articles/336018/Building-C-Applications-with-HTML5)。
 - 使用编译成功的cii辅助工具，把html5编译成C++代码。命令方式如下
 
-	cii -i htm -o htmcpp -f "static int _internal_run( TPropertyBag< str::t_string8 > &in, TPropertyBag< str::t_string8 > &out )"
+	`cii -i htm -o htmcpp -f "static int _internal_run( TPropertyBag< str::t_string8 > &in, TPropertyBag< str::t_string8 > &out )"`
 
 - 与库htmapp及frwk一同编译
 
