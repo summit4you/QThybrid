@@ -1,0 +1,259 @@
+body
+{
+	width:					100%;
+	height:					100%;
+	color: 					#ffffff;
+	background-color:		#808890;
+	/*background-color:		#54768c;*/
+	font-family:			Arial;
+	margin:					0px;
+	-webkit-user-select:	none;
+	-webkit-user-drag: 		none;
+}
+
+.banner
+{
+	height: 80px;
+	background-image: linear-gradient(bottom, rgb(0,0,0) 37%, rgb(66,65,66) 69%, rgb(10,10,10) 85%);
+	background-image: -o-linear-gradient(bottom, rgb(0,0,0) 37%, rgb(66,65,66) 69%, rgb(10,10,10) 85%);
+	background-image: -moz-linear-gradient(bottom, rgb(0,0,0) 37%, rgb(66,65,66) 69%, rgb(10,10,10) 85%);
+	background-image: -webkit-linear-gradient(bottom, rgb(0,0,0) 37%, rgb(66,65,66) 69%, rgb(10,10,10) 85%);
+	background-image: -ms-linear-gradient(bottom, rgb(0,0,0) 37%, rgb(66,65,66) 69%, rgb(10,10,10) 85%);
+
+	background-image: -webkit-gradient(
+		linear,
+		left bottom,
+		left top,
+		color-stop(0.37, rgb(0,0,0)),
+		color-stop(0.69, rgb(66,65,66)),
+		color-stop(0.85, rgb(10,10,10))
+	);
+}
+
+.banner_logo
+{
+	z-index:			99;
+	position:			absolute;
+	left:				240px;
+	top:				0px;
+	margin:				10px;
+	width:				500px;
+	height:				60px;
+}
+
+.hidden
+{
+	display: 			none;
+}
+
+.transparent
+{
+	opacity: 			0;
+}
+
+#about
+{
+	width:				760px;
+	height:				480px;
+	overflow:			auto;
+}
+
+#drives
+{
+	width:				760px;
+	height:				480px;
+	overflow:			auto;
+}
+
+.page
+{
+	position:			absolute;
+	left: 				10px;
+	top: 				100px;
+}
+
+.bdr_gray
+{
+/*
+	border-left:		1px solid #404040;
+	border-top:			1px solid #404040;
+	border-right:		1px solid #404040;
+	border-bottom:		1px solid #404040;
+*/
+}
+
+.driveitem
+{
+	float: 				left;
+	list-style:			none;
+	margin:				20px;
+}
+
+.driveimg
+{
+	clear:				both;
+}
+
+.pathstr
+{
+	clear:				both;
+	margin:				auto;
+}
+
+.hdr
+{
+	position:			absolute;
+	left:				0px;
+	top:				0px;
+	height: 			60px;
+	width: 				800px;
+}
+
+.backbtn
+{
+	margin:				20px;
+}
+
+.hdr_text
+{
+	font-size:			16px;
+	font-weight:		bold;
+	padding:			5px 10px;
+}
+
+.hdr_progress
+{	
+	position:					absolute;
+	background-color:			#406070;
+	left:						380px;
+	top:						0px;
+	height: 					20px;
+	width:						400px;
+	margin:						5px;
+	padding:					5px;
+	border-top-left-radius: 	15px;
+	border-bottom-left-radius:	15px;
+	border-top-right-radius:	15px;
+	border-bottom-right-radius:	15px;
+}
+
+.hdr_progress  .progress_a
+{
+	border-top-left-radius: 	15px;
+	border-bottom-left-radius:	15px;
+	background-image: 			-webkit-gradient(linear,left top,left bottom,color-stop(0, rgba(128,255,128,.50)),color-stop(1, rgba(128,255,128,.25)));
+	background-image: 			-webkit-linear-gradient(rgba(128,255,128,.50), rgba(128,255,128,.25));
+}
+
+.hdr_progress  .progress_b
+{
+	border-top-right-radius:	15px;
+	border-bottom-right-radius:	15px;
+	background-image: 			-webkit-gradient(linear,left top,left bottom,color-stop(0, rgba(255,128,128,.50)),color-stop(1, rgba(255,128,128,.25)));
+	background-image: 			-webkit-linear-gradient(rgba(255,128,128,.50), rgba(255,128,128,.25));
+}
+
+.progress
+{	
+	background-color:			#7090b0;
+	height: 					10px;
+	width:						120px;
+	margin:						2px;
+	padding:					2px;
+	border-top-left-radius: 	10px;
+	border-bottom-left-radius:	10px;
+	border-top-right-radius:	10px;
+	border-bottom-right-radius:	10px;
+}
+
+.progress  .progress_a
+{
+	border-top-left-radius: 	10px;
+	border-bottom-left-radius:	10px;
+	background-image: 			-webkit-gradient(linear,left top,left bottom,color-stop(0, rgba(255,128,128,.50)),color-stop(1, rgba(255,128,128,.25)));
+	background-image: 			-webkit-linear-gradient(rgba(255,128,128,.50), rgba(255,128,128,.25));
+}
+
+.progress  .progress_b
+{
+	border-top-right-radius:	10px;
+	border-bottom-right-radius:	10px;
+	background-image: 			-webkit-gradient(linear,left top,left bottom,color-stop(0, rgba(128,255,128,.50)),color-stop(1, rgba(128,255,128,.25)));
+	background-image: 			-webkit-linear-gradient(rgba(128,255,128,.50), rgba(128,255,128,.25));
+}
+
+
+.progress_a
+{
+	float:						left;
+	/*background-color:			#00a000;*/
+	margin:						0px;
+	padding:					0px;
+}
+
+.progress_b
+{
+	float:						left;
+	/*background-color:			#400000;*/
+	margin:						0px;
+	padding:					0px;
+}
+
+.hdr_size
+{	
+	position:			absolute;
+	left:				110px;
+	top:				10px;
+	height: 			30px;
+	width:				300px;
+}
+
+.hdr_path
+{	
+	position:			absolute;
+	left:				110px;
+	top:				35px;
+	height: 			30px;
+	width:				600px;
+}
+
+.highlight
+{
+	position:			absolute;
+	width:				640px;
+	width:				400px;
+}
+
+.highlightdrive
+{
+	position:			absolute;
+	width:				640px;
+	width:				400px;
+}
+.rightoptions
+{
+	position:			absolute;
+	left:				680px;
+	top:				40px;
+	right:				100px;
+	bottom:				400px;
+}
+
+.rightdrive
+{
+	position:			absolute;
+	left:				640px;
+	top:				440px;
+	right:				100px;
+	bottom:				100px;
+}
+
+.seloption
+{
+	width:				80px;
+}
+.usechart
+{
+	width: 32px;
+	height: 32px;
+}

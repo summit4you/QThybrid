@@ -1,0 +1,96 @@
+<body>
+<?global
+	
+	// Make single drive item
+	str::t_string mkitem( const str::t_string &grp, const str::t_string &path, const str::t_string &type, 
+						  str::t_string id, const str::t_string &used, const str::t_string &total )
+	{
+		return str::t_string() 
+				+ "<li class='driveitem cid_" + grp + "_" + id +" drive-item' value='" + path + "' data-id='did_" + id + "' onclick='selDrive( \"cid_" + grp + "_" + id +"\" )'>" 
+				+ "<div class='pathdrive'><img class='driveimg' src='imgs/nes/drive-" + type + ".png'></div>"
+				+ "<div class='pathstr'>" + path + "</div>"
+				+ "<div class='pid_" + grp + "_" + id +" progress'><div class='progress_a'></div><div class='progress_b'></div></div>"
+				+ "<script language='javascript'>$( setProgress( \".pid_" + grp + "_" + id +"\", " + used + ", " + total + " ) )</script>"
+				+ "</li>\n";
+	}
+	
+	// Make buttons and drive lists
+	void listitems( t_pb &di, const str::t_string &sName, const str::t_string &sType,
+					str::t_string &btns, str::t_string &lists, str::t_string &last )
+	{
+		int i = 0;
+		str::t_string ret;
+		
+		for( t_pb::iterator it = di.begin(); it != di.end(); it++, i++ )
+			if ( sType == "all" || (*it->second)[ tcT( "drive_type" ) ].ToString() == sType )
+				if ( it->second->get( "bytes" ).ToDouble() )
+					ret += mkitem( sType, it->first, it->second->get( "drive_type" ).str(), 
+								   str::ToString< str::t_string>( i ),
+								   it->second->get( "bytes_used" ).str(),
+								   it->second->get( "bytes" ).str() );
+		if ( !ret.length() )
+			return;
+			
+		last = sType;
+			
+		lists += str::t_string() + "<ul class='list_" + sType + " hidden'>" + ret + "</ul>";
+		
+		btns += "<button id='btn_" + sType + "' onclick='switch_list(\"" + sType + "\")' class='" 
+				+ ( !btns.length() ? "first" : "" ) + "'>" + sName + "</button>";
+	}
+
+?><?c
+
+	// Stop the indexer thread
+	tq::stop( "indexer" );
+
+	t_pb di;
+	disk::GetDisksInfo( di, true );
+	
+	// Create buttons and drive lists
+	str::t_string btns, lists, last;		
+	listitems( di, "All", "all", btns, lists, last );
+	listitems( di, "Fixed", "fixed", btns, lists, last );
+	listitems( di, "CD/DVD", "cdrom", btns, lists, last );
+	listitems( di, "Removable", "removable", btns, lists, last );
+	listitems( di, "RamDisk", "ramdisk", btns, lists, last );
+	listitems( di, "Network", "remote", btns, lists, last );
+?>
+	
+	<?c out << btns;?>
+
+	<ul id='dlist'></ul>
+	
+	<?c out << lists;?>
+	
+	<script type="text/javascript">
+
+		$('#btn_<?c out << last ?>').addClass( 'last' );
+	
+		var g_list = 0;
+		function switch_list( id )
+		{	$('button').removeClass( 'active' );
+			$('#btn_'+id).addClass( 'active' );
+			$('#dlist').quicksand( $('.list_'+id+' li') );
+			if ( ++g_list > 3 ) g_list = 0;
+		}		
+		
+		function moveItem( item, from, to )
+		{	var posSrc = from.offset(), posDst = to.offset();			
+			var w = to.width(), h = to.height();
+			item.html( from.html() );
+			item.css( { opacity: 1, left: posSrc.left, top: posSrc.top, width: w, height: h } );
+			item.show().animate( { left: posDst.left, top: posDst.top }, 500 );			
+		}
+
+		function selDrive(id)
+		{	$('.centeritem').html( '' );
+			moveItem( $('.highlight'), $('.'+id+' .pathstr'), $('.hdr_path') );
+			moveItem( $('.highlightdrive'), $('.'+id+' .pathdrive'), $('.rightdrive') );
+			selPage( 'graph' );
+		}
+
+		$(function() { switch_list( "all" ); } );
+
+	</script>
+</body>

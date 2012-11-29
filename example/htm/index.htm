@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title><?c out << CII_PROJECT_DESC ?></title>
+
+	<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+	<meta http-equiv="Access-Control-Allow-Origin" content="*">
+	<meta http-equiv="Access-Control-Allow-Methods" content="POST GET OPTIONS">
+
+	<link type="text/css" rel="stylesheet" href="css/main.css"/>
+	<link type="text/css" rel="stylesheet" href="css/button.css"/>
+
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<!--<script type="text/javascript" src="js/jquery.sparkline.min.js"></script>-->
+	<script type="text/javascript" src="js/jquery.quicksand.js"></script>
+	<script type="text/javascript" src="js/d3/d3.min.js"></script>
+	<script type="text/javascript" src="js/d3/d3.layout.min.js"></script>
+
+</head>
+<body>
+ 
+	<div class='hdr_size hdr_text bdr_gray'></div>
+	<div class='hdr_path hdr_text bdr_gray'></div>
+	<div id='diskprogress' class='hdr_progress hidden'><div class='progress_a'></div><div class='progress_b'></div></div>
+    
+	<div class='banner'>
+		<img class='backbtn transparent' src='imgs/back.png' onclick='selPage( "drives" )'>
+		<div class='banner_logo' onclick='selPage("about")'><a href='javascript:' onclick='selPage("about")'><img src='imgs/dsa.png'></a></div>
+	</div>
+
+	<div class='highlight hdr_text'></div>
+	<div class='highlightdrive'></div>
+	<div class='centeritem hidden'></div>
+	<div class='rightdrive'></div>
+	
+	<div id='drives' class='page'></div>
+	<div id='graph' class='page hidden'></div>
+	<div id='about' class='page hidden'></div>
+
+	<script type='text/javascript'>
+
+		$( $('#drives').load( 'drives.htm' ) );
+
+		var g_sel = '';
+		function getPage() { return g_sel; }
+		
+		function showPage( id, page, dir )
+		{
+			if ( page == id )
+				$('#'+id).load( id+'.htm?root=' + escape( $('.highlight').html() ) ),
+				$('#'+id).hide().animate( { left: dir }, 0 ),
+				$('#'+id).show().animate( { left:'20px' }, 500 );
+			else
+				$('#'+id).animate( { left: dir }, 500 ),
+				setTimeout( function() { $('#'+id).hide(); }, 500 );
+		}
+		
+		/// Selects the active page
+		function selPage( page )
+		{	if ( g_sel == page ) return;
+			g_sel = page;
+			showPage( "drives", page, -1000 );
+			showPage( "graph", page, 1000 );
+			showPage( "about", page, 1000 );
+			switch ( page )
+			{
+				case "about" :
+					$('.backbtn').animate( { opacity: 1 }, 500 );
+					break;
+				
+				case "graph" :
+					$('.banner_logo').animate( { opacity: 0 }, 500 );
+					$('.backbtn').animate( { opacity: 1 }, 500 );
+					$('.hdr_size').animate( { opacity: 1 }, 500 );
+					$('.backbtn').animate( { opacity: 1 }, 500 );
+					setTimeout( function() { $('.banner_logo').hide(); }, 500 );
+					break;
+					
+				default:
+					setProgress( '#diskprogress', 0, 0 ),
+					$('.banner_logo').show().animate( { opacity: 1 }, 500 );
+					$('.hdr_size').animate( { opacity: 0 }, 500 );
+					$('.highlight').animate( { opacity: 0 }, 500 );
+					$('.backbtn').animate( { opacity: 0 }, 500 );
+					$('.highlightdrive').animate( { opacity: 0 }, 500 );
+					
+			} // end switch;
+		}
+
+		/// Updates the progress bar
+		function setProgress( container, progress, total )
+		{
+			var pa = ( 0 < total ) ? parseInt( progress * 100 / total ) : 0;
+			var pb = ( 0 < total ) ? parseInt( ( total - progress ) * 100 / total ) : 0;
+			var w = $(container).width() - 20;
+			var h = $(container).height();
+			
+			// 0 turns progress bar off
+			if ( 0 >= w || 0 >= h || 0 >= total || 0 > progress )
+			{	$(container).addClass( 'hidden' );
+				return;
+			} // end if
+			
+			// Clip at 1% - 100%
+			if ( 99 < pa )
+				pa = 99, pb = 1;
+			if ( 0 >= pa )
+				pa = 1, pb = 99;
+					
+			$(container).removeClass( 'hidden' );
+			
+			$(container + ' .progress_a').height( h );
+			$(container + ' .progress_a').width( parseInt( pa * w / 100 ) + 10 );
+			$(container + ' .progress_b').height( h );
+			$(container + ' .progress_b').width( parseInt( pb * w / 100 ) + 10 );
+		}
+
+	</script>
+  </body>
+</html>

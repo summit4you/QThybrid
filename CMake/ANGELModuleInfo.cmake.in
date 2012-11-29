@@ -1,0 +1,5 @@
+set(@angel-module@_LOADED 1)
+set(@angel-module@_DEPENDS "@angel-module-DEPENDS@")
+set(@angel-module@_LIBRARIES "@angel-module-LIBRARIES@")
+set(@angel-module@_INCLUDE_DIRS "@angel-module-INCLUDE_DIRS@")
+set(@angel-module@_LIBRARY_DIRS "@angel-module-LIBRARY_DIRS@")
