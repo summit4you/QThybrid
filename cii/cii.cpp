@@ -175,6 +175,7 @@ int main( int argc, char* argv[] )
 				" -f / --fdec   Function declaration\n"
 				" -q / --quiet  Suppress all output\n"
 				" -d / --debug  'Show processed command line array'\n"
+				" -p / --plugin 'produce htmapp_resources'\n"
 				" -h / --help   Display this information\n"
 				);
 		return cl.pb().isSet( "h" ) ? 0 : -1;
@@ -206,27 +207,122 @@ int main( int argc, char* argv[] )
 							 t_string8() + "#include \"htmapp_resources.h\"\n"
 										   "#include \"htmapp_resource_extern.hpp\"\n"
 										   "SHmResourceInfo _htmapp_resources[] = \n{\n" );
-
-	// htmapp_resources.h
-	disk::WriteFile( disk::FilePath< t_string8 >( cl.pb()[ "o" ].str(), "htmapp_resources.h" ),
-							 t_string8() + 
-										   "#pragma once\n\n"
-										   "#define HTMAPP_RESOURCES 1\n\n"
-										   "#define hmResourceFn( n ) int (*n)( const TPropertyBag< str::t_string8 > &in, std::basic_string< str::t_string8 > &out );\n"
-										   "\ntypedef struct td_SHmResourceInfo\n{"
-										   "\n\tconst char*   name;"
-										   "\n\tunsigned long sz_size;"
-										   "\n\tconst void*   data;"
-										   "\n\tunsigned long sz_data;"
-										   "\n\tunsigned long type;"
-										   "\n} SHmResourceInfo;\n"
-										   "\n#if defined( _cplusplus )\n"
-										   "\nextern \"C\"\n"
-										   "\n#else\n"
-										   "\nextern\n"
-										   "\n#endif\n"
-										   "\n\tSHmResourceInfo _htmapp_resources[];\n"
-										 );
+	if ( cl.pb().isSet( "p" ) || cl.pb().isSet( "plugin" ))
+	{
+		// htmapp_resources.h
+		disk::WriteFile( disk::FilePath< t_string8 >( cl.pb()[ "o" ].str(), "htmapp_resources.h" ),
+								 t_string8() + 
+											   "#pragma once\n\n"
+											   "#define HTMAPP_RESOURCES 1\n\n"
+											   "#define hmResourceFn( n ) int (*n)( const TPropertyBag< str::t_string8 > &in, std::basic_string< str::t_string8 > &out );\n"
+											   "\ntypedef struct td_SHmResourceInfo\n{"
+											   "\n\tconst char*   name;"
+											   "\n\tunsigned long sz_size;"
+											   "\n\tconst void*   data;"
+											   "\n\tunsigned long sz_data;"
+											   "\n\tunsigned long type;"
+											   "\n} SHmResourceInfo;\n"
+											   "\n\t extern \"C\" __declspec(dllexport) SHmResourceInfo _htmapp_resources[];\n"
+											 );
+		// cmakelists.txt
+		disk::WriteFile( disk::FilePath< t_string8 >( cl.pb()[ "o" ].str(), "CMakeLists.txt" ),
+								 t_string8() + 
+											   "PROJECT(htmapp_resources)\n\n"
+											   "CMAKE_MINIMUM_REQUIRED(VERSION 2.8)\n\n"
+											   "IF (MSVC)\n"
+											   "\tADD_DEFINITIONS( /D \"NOMINMAX\" /D \"WIN32_LEAN_AND_MEAN\" )\n"
+											   "ENDIF (MSVC)\n"
+											   "\nadd_definitions( \"/W3 /D_CRT_SECURE_NO_WARNINGS /wd4309 /nologo\" )\n"
+											   "\nset(htmapp_resources_FILES ${htmapp_resources_SOURCE_DIR})\n"
+											   "\nfile(GLOB_RECURSE htmapp_resources_FILES ${htmapp_resources_FILES}/*.cpp )\n"
+											   "\nINCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR}  ${htmapp_INCLUDE_DIRS} )\n"
+											   "\nadd_library(htmapp_resources SHARED ${htmapp_resources_FILES} )\n"
+											 );
+	}else{
+		// htmapp_resources.h
+		disk::WriteFile( disk::FilePath< t_string8 >( cl.pb()[ "o" ].str(), "htmapp_resources.h" ),
+								 t_string8() + 
+											   "#pragma once\n\n"
+											   "#define HTMAPP_RESOURCES 1\n\n"
+											   "#define hmResourceFn( n ) int (*n)( const TPropertyBag< str::t_string8 > &in, std::basic_string< str::t_string8 > &out );\n"
+											   "\ntypedef struct td_SHmResourceInfo\n{"
+											   "\n\tconst char*   name;"
+											   "\n\tunsigned long sz_size;"
+											   "\n\tconst void*   data;"
+											   "\n\tunsigned long sz_data;"
+											   "\n\tunsigned long type;"
+											   "\n} SHmResourceInfo;\n"
+											   "\n#if defined( _cplusplus )\n"
+											   "\nextern \"C\"\n"
+											   "\n#else\n"
+											   "\nextern\n"
+											   "\n#endif\n"
+											   "\n\tSHmResourceInfo _htmapp_resources[];\n"
+											 );
+		// main.c
+		disk::WriteFile( disk::FilePath< t_string8 >( cl.pb()[ "o" ].str(), "main.cpp" ),
+								 t_string8() + 
+											  "#include \"frwk.h\"\n"
+												"#include \"htmapp_resources.h\"\n"
+												"#include \"network.h\"\n"
+												"#include \"web_page.h\"\n"
+												"#include \"mainwindow.h\"\n"
+												"#include <Windows.h>\n\n"
+												"int main( int argc, char* argv[] )\n"
+												"{\n\n"
+												"	HTMAPP_INIT_RESOURCES();\n\n"
+												"	// Initialize thread queue\n"
+												"	tq::init( true );\n\n"
+												"	// Initialize application object\n"
+												"	QApplication app( argc, argv );\n\n"
+												"	// Create main window\n"
+												"	CMainWindow *pWindow = new CMainWindow;\n"
+												"	if ( !pWindow )\n"
+												"		return -1;\n\n"
+												"#if defined( CII_PROJECT_NAME )\n"
+												"	pWindow->setName( CII_PROJECT_NAME );\n"
+												"#endif	\n\n"
+												"#if defined( CII_PROJECT_DESC )\n"
+												"	pWindow->setDescription( CII_PROJECT_DESC );\n"
+												"#endif	\n\n"
+												"	// Make the command line accessible\n"
+												"	tq::set( \"cmdline\", TCmdLine< str::t_string >( argc, argv ).pb() );\n\n"
+												"	// Make the makefile parameters accessible\n"
+												"#if defined( CII_PARAMS )\n"
+												"	tq::set( \"ciid\", parser::DecodeJson< t_pb >( CII_PARAMS ) );\n"
+												"#endif\n"
+												"	\n"
+												"	// Initialize the window\n"
+												"	pWindow->Init();\n\n"
+												"	// Show the window\n"
+												"	pWindow->show();\n\n"
+												"	// Run the app\n"
+												"	int ret = app.exec();\n\n"
+												"	// Uninitialize thread queue\n"
+												"	tq::uninit();\n\n"
+												"	return ret;\n"
+												"}\n"
+											 );
+		
+			// cmakelists.txt
+			disk::WriteFile( disk::FilePath< t_string8 >( cl.pb()[ "o" ].str(), "CMakeLists.txt" ),
+								 t_string8() + 
+											  "PROJECT(QThybridApp)\n"
+												"CMAKE_MINIMUM_REQUIRED(VERSION 2.8)\n"
+												"SET(QT_USE_QTMAIN TRUE)\n"
+												"SET(QT_USE_QTWEBKIT TRUE)\n\n"
+												"IF (MSVC)\n"
+												"  ADD_DEFINITIONS( /D \"NOMINMAX\" /D \"WIN32_LEAN_AND_MEAN\" )\n"
+												"ENDIF (MSVC)\n\n"
+												"add_definitions( \"/W3 /D_CRT_SECURE_NO_WARNINGS /wd4309 /nologo\" )\n\n\n"
+												"FIND_PACKAGE(Qt4 REQUIRED)\n"
+												"INCLUDE(${QT_USE_FILE})\n\n"
+												"file(GLOB_RECURSE QThybridApp_FILES ${QThybridApp_SOURCE_DIR}/*.cpp )\n\n"
+												"INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR}  ${htmapp_INCLUDE_DIRS} ${frwk_INCLUDE_DIRS} )\n\n"
+												"ADD_EXECUTABLE(QThybridApp  WIN32 ${QThybridApp_FILES} )\n\n"
+												"TARGET_LINK_LIBRARIES(QThybridApp ${QT_LIBRARIES})\n"
+											 );
+	}
 
 	// Get compiled types
 	t_strlist8 lstCmp;
