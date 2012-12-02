@@ -35,6 +35,7 @@
 #include "htmapp.h"
 #include "process_binary.h"
 #include "process_cpp.h"
+#include "process_csp.h"
 
 typedef str::t_char8 t_char8;
 typedef str::t_string8 t_string8;
@@ -77,9 +78,12 @@ int process_file( t_string8 x_sInDir, t_string8 x_sOutDir, t_string8 x_sOutPre, 
 							  + "\n\t0,"
 							  + "\n\t2\n},\n"
 							);
-
+			
 			// Process the embedded c/c++ file
-			process_cpp( sIn, sOut, sVar, sFn );
+			if ( !cl.pb().isSet( "l" ) && !cl.pb().isSet( "template" ))
+				process_cpp( sIn, sOut, sVar, sFn );
+			else
+				process_csp( sIn, sOut, sVar, sFn );
 				
 			return 0;
 		} // end if
@@ -177,6 +181,7 @@ int main( int argc, char* argv[] )
 				" -d / --debug  'Show processed command line array'\n"
 				" -p / --plugin 'produce htmapp_resources'\n"
 				" -h / --help   Display this information\n"
+				" -l / --template use CTemplate\n"
 				);
 		return cl.pb().isSet( "h" ) ? 0 : -1;
 	} // end if
@@ -303,7 +308,7 @@ int main( int argc, char* argv[] )
 												"	return ret;\n"
 												"}\n"
 											 );
-		
+		if ( !cl.pb().isSet( "l" ) && !cl.pb().isSet( "template" )){
 			// cmakelists.txt
 			disk::WriteFile( disk::FilePath< t_string8 >( cl.pb()[ "o" ].str(), "CMakeLists.txt" ),
 								 t_string8() + 
@@ -322,12 +327,92 @@ int main( int argc, char* argv[] )
 												"ADD_EXECUTABLE(QThybridApp  WIN32 ${QThybridApp_FILES} )\n\n"
 												"TARGET_LINK_LIBRARIES(QThybridApp ${QT_LIBRARIES})\n"
 											 );
+		}else{
+			disk::WriteFile( disk::FilePath< t_string8 >( cl.pb()[ "o" ].str(), "CMakeLists.txt" ),
+				t_string8() + 
+				"PROJECT(QThybridApp)\n"
+				"CMAKE_MINIMUM_REQUIRED(VERSION 2.8)\n"
+				"SET(QT_USE_QTMAIN TRUE)\n"
+				"SET(CMAKE_MODULE_PATH ${QThybridApp_SOURCE_DIR} ${CMAKE_MODULE_PATH})\n"
+				"SET(QT_USE_QTWEBKIT TRUE)\n\n"
+				"IF (MSVC)\n"
+				"  ADD_DEFINITIONS( /D \"NOMINMAX\" /D \"WIN32_LEAN_AND_MEAN\" )\n"
+				"ENDIF (MSVC)\n\n"
+				"add_definitions( \"/W3 /D_CRT_SECURE_NO_WARNINGS /wd4309 /nologo\" )\n\n\n"
+				"INCLUDE(FindCtemplate)\n"
+				"FIND_PACKAGE(Ctemplate)\n\n"
+				"FIND_PACKAGE(Qt4 REQUIRED)\n\n"
+				"IF(NOT CTEMPLATE_FOUND)\n"
+				"	message(SEND_ERROR \"Ctemplate needs to be built\")\n"
+				"ENDIF()\n\n"
+				"include_directories(${CTEMPLATE_INCLUDE_DIR})\n\n"
+				"INCLUDE(${QT_USE_FILE})\n\n"
+				"file(GLOB_RECURSE QThybridApp_FILES ${QThybridApp_SOURCE_DIR}/*.cpp )\n\n"
+				"INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR}  ${htmapp_INCLUDE_DIRS} ${frwk_INCLUDE_DIRS} )\n\n"
+				"ADD_EXECUTABLE(QThybridApp  WIN32 ${QThybridApp_FILES} )\n\n"
+				"TARGET_LINK_LIBRARIES(QThybridApp ${QT_LIBRARIES} ${CTEMPLATE_LIBRARIES})\n"
+				);
+
+			disk::WriteFile( disk::FilePath< t_string8 >( cl.pb()[ "o" ].str(), "FindCtemplate.cmake" ),
+				t_string8() + 
+				"if (CTEMPLATE_INCLUDE_DIR AND CTEMPLATE_LIBRARIES)\n"
+				"  # in cache already\n"
+				"  set(CTEMPLATE_FOUND TRUE)\n\n"
+				"else (CTEMPLATE_INCLUDE_DIR AND CTEMPLATE_LIBRARIES)\n"
+				"  find_path(CTEMPLATE_INCLUDE_DIR ctemplate/template.h)\n"
+				"  find_library(CTEMPLATE_LIBRARIES NAMES ctemplate)\n"
+				"  find_program(CTEMPLATE_COMPILER make_tpl_varnames_h)\n\n"
+				"  include(FindPackageHandleStandardArgs)\n"
+				"  FIND_PACKAGE_HANDLE_STANDARD_ARGS(Ctemplate DEFAULT_MSG CTEMPLATE_INCLUDE_DIR CTEMPLATE_LIBRARIES )\n\n"
+				"endif (CTEMPLATE_INCLUDE_DIR AND CTEMPLATE_LIBRARIES)\n\n\n"
+				"macro (CTEMPLATE_VARNAMES outfiles)\n"
+				"  foreach (infile ${ARGN})\n"
+				"    get_filename_component(infile ${infile} ABSOLUTE)\n"
+				"    CTEMPLATE_MAKE_OUTPUT_file(${infile} varnames.h outfile)\n"
+				"    add_custom_command(OUTPUT ${outfile}\n"
+				"                       COMMAND ${CTEMPLATE_COMPILER} -q -f ${outfile} ${infile} \n"
+				"                       DEPENDS ${infile} VERBATIM)\n"
+				"    set(${outfiles} ${${outfiles}} ${outfile})\n"
+				"  endforeach(infile)\n\n"
+				"endmacro (CTEMPLATE_VARNAMES outfiles)\n\n"
+				"# macro used to create the names of output files preserving relative dirs\n"
+				"macro (CTEMPLATE_MAKE_OUTPUT_file infile ext outfile )\n"
+				"  string(LENGTH ${CMAKE_CURRENT_BINARY_DIR} _binlength)\n"
+				"  string(LENGTH ${infile} _infileLength)\n"
+				"  set(_checkinfile ${CMAKE_CURRENT_SOURCE_DIR})\n"
+				"  if(_infileLength GREATER _binlength)\n"
+				"    string(SUBSTRING \"${infile}\" 0 ${_binlength} _checkinfile)\n"
+				"    if(_checkinfile STREQUAL \"${CMAKE_CURRENT_BINARY_DIR}\")\n"
+				"      file(RELATIVE_PATH rel ${CMAKE_CURRENT_BINARY_DIR} ${infile})\n"
+				"    else(_checkinfile STREQUAL \"${CMAKE_CURRENT_BINARY_DIR}\")\n"
+				"      file(RELATIVE_PATH rel ${CMAKE_CURRENT_SOURCE_DIR} ${infile})\n"
+				"    endif(_checkinfile STREQUAL \"${CMAKE_CURRENT_BINARY_DIR}\")\n"
+				"  else(_infileLength GREATER _binlength)\n"
+				"    file(RELATIVE_PATH rel ${CMAKE_CURRENT_SOURCE_DIR} ${infile})\n"
+				"  endif(_infileLength GREATER _binlength)\n"
+				"  if(WIN32 AND rel MATCHES \"^[a-zA-Z]:\") # absolute path \n"
+				"    string(REGEX REPLACE \"^([a-zA-Z]):(.*)$\" \"\\1_\\2\" rel \"${rel}\")\n"
+				"  endif(WIN32 AND rel MATCHES \"^[a-zA-Z]:\") \n"
+				"  set(_outfile \"${CMAKE_CURRENT_BINARY_DIR}/${rel}\")\n"
+				"  string(REPLACE \"..\" \"__\" _outfile ${_outfile})\n"
+				"  get_filename_component(outpath ${_outfile} PATH)\n"
+				"  get_filename_component(_outfile ${_outfile} NAME)\n"
+				"  file(MAKE_DIRECTORY ${outpath})\n"
+				"  set(${outfile} ${outpath}/${_outfile}.${ext})\n"
+				"endmacro (CTEMPLATE_MAKE_OUTPUT_file)\n"
+				);
+		}
 	}
 
 	// Get compiled types
 	t_strlist8 lstCmp;
 	if ( !cl.pb().isSet( "c" ) )
-		lstCmp.push_back( "*.htm" );
+	{
+		if ( !cl.pb().isSet( "l" ) && !cl.pb().isSet( "template" ))
+			lstCmp.push_back( "*.htm" );
+		else
+			lstCmp.push_back( "*.csp" );
+	}
 	else
 		lstCmp = str::SplitQuoted< t_string8, t_strlist8 >
 								   ( (char*)cl.pb()[ "c" ].data(), cl.pb()[ "c" ].length(), 

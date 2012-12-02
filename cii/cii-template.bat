@@ -1,0 +1,1 @@
+cii.exe -i htm -o htmapp_resources -f "static int _internal_run( TPropertyBag< str::t_string8 > &in, TPropertyBag< str::t_string8 > &out )" -l
