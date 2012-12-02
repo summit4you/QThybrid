@@ -1,0 +1,13 @@
+<?global
+
+	int i = 100;
+	
+?>
+
+<?c
+	std::map<string, string> values;
+	values["i"] = i;
+	values["title"] = "hello world";
+
+	out << csp_template("tpl/index.htm", values);
+?>

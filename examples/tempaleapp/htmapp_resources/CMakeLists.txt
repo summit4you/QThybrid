@@ -1,0 +1,34 @@
+PROJECT(QThybridApp)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+SET(QT_USE_QTMAIN TRUE)
+SET(QT_USE_QTWEBKIT TRUE)
+
+set(CMAKE_MODULE_PATH ${QThybridApp_SOURCE_DIR} ${CMAKE_MODULE_PATH})
+
+IF (MSVC)
+  ADD_DEFINITIONS( /D "NOMINMAX" /D "WIN32_LEAN_AND_MEAN" )
+ENDIF (MSVC)
+
+add_definitions( "/W3 /D_CRT_SECURE_NO_WARNINGS /wd4309 /nologo" )
+
+include(FindCtemplate)
+find_package(Ctemplate)
+
+# Check that MITK has been build with Qt support
+if(NOT CTEMPLATE_FOUND)
+  message(SEND_ERROR "Ctemplate needs to be built")
+endif()
+
+include_directories(${CTEMPLATE_INCLUDE_DIR})
+
+
+FIND_PACKAGE(Qt4 REQUIRED)
+INCLUDE(${QT_USE_FILE})
+
+file(GLOB_RECURSE QThybridApp_FILES ${QThybridApp_SOURCE_DIR}/*.cpp )
+
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR}  ${htmapp_INCLUDE_DIRS} ${frwk_INCLUDE_DIRS} )
+
+ADD_EXECUTABLE(QThybridApp  WIN32 ${QThybridApp_FILES} )
+
+TARGET_LINK_LIBRARIES(QThybridApp ${QT_LIBRARIES} ${CTEMPLATE_LIBRARIES})

@@ -58,5 +58,5 @@ set(ANGEL_MODULES_DIR "${ANGEL_BINARY_DIR}/${ANGEL_INSTALL_PACKAGE_DIR}/Modules"
 add_subdirectory(htmapp)
 add_subdirectory(frwk)
 add_subdirectory(cii)
-add_subdirectory(example)
+add_subdirectory(examples)
 add_subdirectory(plugin-in)
