@@ -188,3 +188,50 @@ LICENSE
 - 与库htmapp及frwk一同编译
 
 代码库中提供了一个磁盘检测的例子。
+
+模板引擎
+========
+
+当前加入CTemplate的支持，使得你可以用MVC模式开发QThybrid应用。*.csp用于后台代码， *.htm用于前台代码。示例如下
+
+index.csp
+
+	<?global
+
+		int i = 100;
+		
+	?>
+
+	<?c
+		std::map<string, string> values;
+		values["i"] = i;
+		values["title"] = "hello world";
+
+		out << csp_template("tpl/index.htm", values);
+	?>
+
+解释
+
+- <?global 括住的代表全局变量
+
+- <? 括住的代表后台代码
+
+- std::map<string, string>用于向模板传值， 例子中我们有两个模板参数
+
+- csp_template用于调用模板， 参数1为模板的路径，参数2为模板参数容器
+
+index.htm遵循CTemplate约定, 请参见[这里](http://code.google.com/p/ctemplate/?redir=1)
+
+	<!DOCTYPE html>
+	<html>
+	<head>
+		<title>{{title}}</title>
+		</head>
+	<body>
+		{{i}}
+	</body>
+	</html>
+
+
+例子参见 example/templateapp 
+
