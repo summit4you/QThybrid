@@ -41,7 +41,7 @@ CNetworkReply::CNetworkReply( QObject *parent, const QNetworkRequest &req, const
 	setUrl( req.url() );
 	setOperation( op );
 	QNetworkReply::open( QIODevice::ReadOnly | QIODevice::Unbuffered );
-
+	
 	// Bogus content
 	m_lOffset = 0;
 	m_content.clear();
@@ -93,11 +93,13 @@ CNetworkReply::CNetworkReply( QObject *parent, const QNetworkRequest &req, const
 						// in / out
 						TPropertyBag< str::t_string8 > in;
 						TPropertyBag< str::t_string8 > out;
-						
+
+						in[ "POST" ] = ((CNetworkMgr*)parent)->m_post;
 						// Copy GET parameters
 						long szQi = req.url().encodedQueryItems().size();
 						if ( szQi )
 						{	TPropertyBag< str::t_string8 > &pbGet = in[ "GET" ];
+							
 							for( long i = 0; i < szQi; i++ ) 
 							{	const QPair< QByteArray, QByteArray > it = req.url().encodedQueryItems().at( i );
 								pbGet[ parser::DecodeUrlStr( str::t_string8( it.first.data(), it.first.length() ) ) ]
@@ -178,9 +180,57 @@ CNetworkMgr::CNetworkMgr( QObject *pParent, QNetworkAccessManager *pPrev )
 QNetworkReply* CNetworkMgr::createRequest( QNetworkAccessManager::Operation op, const QNetworkRequest &req, QIODevice *device )
 {
 	// printf( "%s(%d) : %s\n", __FILE__, __LINE__, req.url().toString().toUtf8().data() );
+	// fetch post data
+	// http://fossies.org/unix/www/xhtmldbg-0.8.14.tar.gz:a/xhtmldbg-0.8.14/src/networker/networkaccessmanager.cpp
+	
+	m_post.clear();
 
 	if ( req.url().host() == "embedded" )
+	{
+		if ( device && device->isOpen() )
+		{
+			QByteArray postData = QByteArray::fromPercentEncoding ( device->peek ( UCHAR_MAX * 1024 ) );
+			QTextCodec* codec = QTextCodec::codecForHtml ( postData, QTextCodec::codecForName ( "UTF-8" ) );
+			QString string = codec->toUnicode ( postData );
+			if ( string.contains ( "WebKitFormBoundary" ) )
+			{
+				QStringList buffer, list;
+				QStringList line = string.split ( "\n" );
+				line.removeFirst();
+				for ( int l = 0; l < line.size(); l++ )
+				{
+					QString str = line.at ( l ).trimmed();
+					if ( str.contains ( "Content-Disposition" ) )
+					{
+						if (str.contains("filename="))
+						{
+							buffer << str.split ( "filename=" ).first().split ( "name=" ).last().remove ( "\"" ).remove ( " " ).remove ( ";" );
+							buffer << str.split ( "filename=" ).last().remove ( "\"" );
+						}else
+							buffer << str.split ( "name=" ).last().remove ( "\"" );
+					}
+					if ( str.contains ( "WebKitFormBoundary" ) )
+						buffer << line.at ( ( l - 1 ) );
+					else
+						continue;
+				}
+				if ( buffer.size() % 2 != 0 )
+					buffer << "";
+				for ( int i = 0; i < buffer.size(); i += 2 )
+				{
+					list << ( buffer.at ( i ) + "=" + buffer.at ( ( i+1 ) ) );
+					m_post[(const char *)(buffer.at ( i ).toLocal8Bit())] = (const char *)buffer.at ( ( i+1 ) ).toLocal8Bit();
+					
+				}
+				buffer.clear();
+				// qDebug() << list;
+
+			}
+			//QStringList param = string.split ( QString::fromUtf8 ( "&" ) );
+			//if ( param.size() >= 1 );		
+		}
 		return new CNetworkReply( this, req, op );
+	}
 
 	return new CNetworkReply( this, req, op );
 	

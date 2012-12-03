@@ -36,6 +36,7 @@
 #	include "frwk.h"
 #endif
 
+#include "htmapp.h"
 #include <QtNetwork/QNetworkReply>
 
 
@@ -80,6 +81,10 @@ public:
 
 	/// Constructor
 	CNetworkMgr( QObject *pParent, QNetworkAccessManager *pPrev );
+
+
+
+	TPropertyBag< str::t_string8 > m_post;
 
 protected:
 

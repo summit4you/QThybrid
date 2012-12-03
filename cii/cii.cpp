@@ -403,13 +403,9 @@ int main( int argc, char* argv[] )
 				"TARGET_LINK_LIBRARIES(QThybridApp ${QT_LIBRARIES} ${CTEMPLATE_LIBRARIES} ${QTHYBRID_LIBRARIES})\n"
 				);
 
-			disk::WriteFile( disk::FilePath< t_string8 >( cl.pb()[ "o" ].str(), "csp_template.h" ),
-				t_string8() + "#pragma once\n\n"
-							"#include \"htmapp.h\"\n"
-							"#include \"ctemplate/template.h\"\n"
-							"#include <map> \n\n"
-							"using namespace std;\n\n"
-							"typedef map<string , string> T_dictvalues;\n\n"
+			
+			disk::WriteFile( disk::FilePath< t_string8 >( cl.pb()[ "o" ].str(), "csp_template.cpp" ),
+				t_string8() + "#include \"csp_template.h\"\n"
 							"str::t_string8 csp_template(str::t_string8 path, T_dictvalues values)\n"
 							"{\n"
 							"	str::t_string8 full = \n"
@@ -442,7 +438,17 @@ int main( int argc, char* argv[] )
 							"		}\n"
 							"	}\n"
 							"	return htm;\n"
-							"}\n"
+							"}\n");
+
+			disk::WriteFile( disk::FilePath< t_string8 >( cl.pb()[ "o" ].str(), "csp_template.h" ),
+				t_string8() + "#pragma once\n\n"
+							"#include \"htmapp.h\"\n"
+							"#include \"ctemplate/template.h\"\n"
+							"#include <map> \n\n"
+							"using namespace std;\n\n"
+							"typedef map<string , string> T_dictvalues;\n\n"
+							"str::t_string8 csp_template(str::t_string8 path, T_dictvalues values);\n"
+							
 			);
 
 			disk::WriteFile( disk::FilePath< t_string8 >( cl.pb()[ "o" ].str(), "FindCtemplate.cmake" ),
