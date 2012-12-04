@@ -4,6 +4,7 @@ set(frwk_SRC
 mainwindow.cpp
 network.cpp
 web_page.cpp
+json.cpp
 )
 
 

@@ -33,7 +33,9 @@
 #include "frwk.h"
 #include "network.h"
 
-CNetworkReply::CNetworkReply( QObject *parent, const QNetworkRequest &req, const QNetworkAccessManager::Operation op )
+
+
+CNetworkReply::CNetworkReply( QObject *parent, const QNetworkRequest &req, const QNetworkAccessManager::Operation op, TPropertyBag< str::t_string8 > post, TPropertyBag< str::t_string8 > file )
 	: QNetworkReply( parent )
 {
 	// Setup the request
@@ -94,7 +96,9 @@ CNetworkReply::CNetworkReply( QObject *parent, const QNetworkRequest &req, const
 						TPropertyBag< str::t_string8 > in;
 						TPropertyBag< str::t_string8 > out;
 
-						in[ "POST" ] = ((CNetworkMgr*)parent)->m_post;
+						in[ "POST" ] = post;
+						in[ "FILE" ] = file;
+
 						// Copy GET parameters
 						long szQi = req.url().encodedQueryItems().size();
 						if ( szQi )
@@ -183,56 +187,80 @@ QNetworkReply* CNetworkMgr::createRequest( QNetworkAccessManager::Operation op, 
 	// fetch post data
 	// http://fossies.org/unix/www/xhtmldbg-0.8.14.tar.gz:a/xhtmldbg-0.8.14/src/networker/networkaccessmanager.cpp
 	
-	m_post.clear();
+	TPropertyBag< str::t_string8 > post;
+	TPropertyBag< str::t_string8 > file;
 
 	if ( req.url().host() == "embedded" )
 	{
 		if ( device && device->isOpen() )
 		{
-			QByteArray postData = QByteArray::fromPercentEncoding ( device->peek ( UCHAR_MAX * 1024 ) );
+		/*	QByteArray postData = QByteArray::fromPercentEncoding ( device->peek ( UCHAR_MAX * 1024 ) );
 			QTextCodec* codec = QTextCodec::codecForHtml ( postData, QTextCodec::codecForName ( "UTF-8" ) );
-			QString string = codec->toUnicode ( postData );
+			QString string = codec->toUnicode ( postData );*/
+			
+			QByteArray postData = device->readAll();
+			QTextCodec* codec = QTextCodec::codecForHtml ( postData, QTextCodec::codecForName ( "UTF-8" ) );
+
+			QString string  = codec->toUnicode(postData);
+
+		
 			if ( string.contains ( "WebKitFormBoundary" ) )
 			{
-				QStringList buffer, list;
+				QStringList buffer;
 				QStringList line = string.split ( "\n" );
 				line.removeFirst();
+				QString name ; 
 				for ( int l = 0; l < line.size(); l++ )
 				{
 					QString str = line.at ( l ).trimmed();
 					if ( str.contains ( "Content-Disposition" ) )
 					{
 						if (str.contains("filename="))
-						{
-							buffer << str.split ( "filename=" ).first().split ( "name=" ).last().remove ( "\"" ).remove ( " " ).remove ( ";" );
-							buffer << str.split ( "filename=" ).last().remove ( "\"" );
-						}else
-							buffer << str.split ( "name=" ).last().remove ( "\"" );
+						{						
+							name = str.split ( "filename=" ).first().split ( "name=" ).last().remove ( "\"" ).remove ( " " ).remove ( ";" );
+							QString filename = str.split ( "filename=" ).last().remove ( "\"" );
+
+							file[(const char*)name.toLocal8Bit()]["filename"] = (const char*)filename.toLocal8Bit();
+							l = l+3;
+							while(l < line.size() && !line.at ( l ).contains ( "WebKitFormBoundary" ))
+							{
+								buffer << line.at ( l );
+								l++;
+							}
+							file[(const char*)name.toLocal8Bit()]["data"] = (const char*)buffer.join("\n").toLocal8Bit();
+						}else{
+							name =   str.split ( "name=" ).last().remove ( "\"" );
+						}
 					}
 					if ( str.contains ( "WebKitFormBoundary" ) )
-						buffer << line.at ( ( l - 1 ) );
+					{
+						// buffer << line.at ( ( l - 1 ) );
+						QString data = line.at ( ( l - 1 ) ).trimmed();
+						
+						post[(const char*)name.toLocal8Bit()] = (const char*)data.toLocal8Bit();
+					}
 					else
 						continue;
 				}
-				if ( buffer.size() % 2 != 0 )
-					buffer << "";
-				for ( int i = 0; i < buffer.size(); i += 2 )
+				/*if ( buffer.size() % 2 != 0 )
+					buffer << "";*/
+				/*for ( int i = 0; i < buffer.size(); i += 2 )
 				{
 					list << ( buffer.at ( i ) + "=" + buffer.at ( ( i+1 ) ) );
-					m_post[(const char *)(buffer.at ( i ).toLocal8Bit())] = (const char *)buffer.at ( ( i+1 ) ).toLocal8Bit();
+					post[(const char *)(buffer.at ( i ).toLocal8Bit())] = (const char *)buffer.at ( ( i+1 ) ).toLocal8Bit();
 					
 				}
-				buffer.clear();
+				buffer.clear();*/
 				// qDebug() << list;
 
 			}
 			//QStringList param = string.split ( QString::fromUtf8 ( "&" ) );
 			//if ( param.size() >= 1 );		
 		}
-		return new CNetworkReply( this, req, op );
+		return new CNetworkReply( this, req, op, post, file );
 	}
 
-	return new CNetworkReply( this, req, op );
+	return new CNetworkReply( this, req, op, post, file );
 	
 	// This could be enabled to allow network access
 	// return QNetworkAccessManager::createRequest( op, req, device );

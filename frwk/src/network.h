@@ -47,7 +47,7 @@ class CNetworkReply : public QNetworkReply
 public:
 
 	/// Constructor
-	CNetworkReply( QObject *parent, const QNetworkRequest &req, const QNetworkAccessManager::Operation op );
+	CNetworkReply( QObject *parent, const QNetworkRequest &req, const QNetworkAccessManager::Operation op, TPropertyBag< str::t_string8 > post, TPropertyBag< str::t_string8 > file);
 
 	/// Aborts the transfer
 	void abort() { QNetworkReply::close(); }
@@ -83,8 +83,6 @@ public:
 	CNetworkMgr( QObject *pParent, QNetworkAccessManager *pPrev );
 
 
-
-	TPropertyBag< str::t_string8 > m_post;
 
 protected:
 
