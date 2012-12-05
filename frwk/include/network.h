@@ -36,6 +36,10 @@
 #	include "frwk.h"
 #endif
 
+#include "htmapp.h"
+#include <QtNetwork/QNetworkReply>
+
+
 class CNetworkReply : public QNetworkReply
 {
 	Q_OBJECT
@@ -43,7 +47,7 @@ class CNetworkReply : public QNetworkReply
 public:
 
 	/// Constructor
-	CNetworkReply( QObject *parent, const QNetworkRequest &req, const QNetworkAccessManager::Operation op );
+	CNetworkReply( QObject *parent, const QNetworkRequest &req, const QNetworkAccessManager::Operation op, TPropertyBag< str::t_string8 > post, TPropertyBag< str::t_string8 > file, TPropertyBag< str::t_string8 >  payload );
 
 	/// Aborts the transfer
 	void abort() { QNetworkReply::close(); }
@@ -77,6 +81,8 @@ public:
 
 	/// Constructor
 	CNetworkMgr( QObject *pParent, QNetworkAccessManager *pPrev );
+
+
 
 protected:
 

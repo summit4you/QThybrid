@@ -35,7 +35,7 @@
 
 
 
-CNetworkReply::CNetworkReply( QObject *parent, const QNetworkRequest &req, const QNetworkAccessManager::Operation op, TPropertyBag< str::t_string8 > post, TPropertyBag< str::t_string8 > file )
+CNetworkReply::CNetworkReply( QObject *parent, const QNetworkRequest &req, const QNetworkAccessManager::Operation op, TPropertyBag< str::t_string8 > post, TPropertyBag< str::t_string8 > file, TPropertyBag< str::t_string8 > payload )
 	: QNetworkReply( parent )
 {
 	// Setup the request
@@ -98,6 +98,7 @@ CNetworkReply::CNetworkReply( QObject *parent, const QNetworkRequest &req, const
 
 						in[ "POST" ] = post;
 						in[ "FILE" ] = file;
+						in["input"] = payload;
 
 						// Copy GET parameters
 						long szQi = req.url().encodedQueryItems().size();
@@ -189,6 +190,7 @@ QNetworkReply* CNetworkMgr::createRequest( QNetworkAccessManager::Operation op, 
 	
 	TPropertyBag< str::t_string8 > post;
 	TPropertyBag< str::t_string8 > file;
+	TPropertyBag< str::t_string8 > payload;
 
 	if ( req.url().host() == "embedded" )
 	{
@@ -253,14 +255,16 @@ QNetworkReply* CNetworkMgr::createRequest( QNetworkAccessManager::Operation op, 
 				buffer.clear();*/
 				// qDebug() << list;
 
+			}else{
+				payload = (const char*)string.toLocal8Bit();
 			}
 			//QStringList param = string.split ( QString::fromUtf8 ( "&" ) );
 			//if ( param.size() >= 1 );		
 		}
-		return new CNetworkReply( this, req, op, post, file );
+		return new CNetworkReply( this, req, op, post, file, payload );
 	}
 
-	return new CNetworkReply( this, req, op, post, file );
+	return new CNetworkReply( this, req, op, post, file , payload );
 	
 	// This could be enabled to allow network access
 	// return QNetworkAccessManager::createRequest( op, req, device );
