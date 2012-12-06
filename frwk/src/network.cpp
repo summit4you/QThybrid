@@ -114,9 +114,9 @@ CNetworkReply::CNetworkReply( QObject *parent, const QNetworkRequest &req, const
 
 						// Execute the page
 						pFn( in, out );
-
+						
 						// Set the output
-						m_content.append( out.data(), out.length() );
+						m_content.append( out.data() , out.length() );
 
 					} // end if
 
