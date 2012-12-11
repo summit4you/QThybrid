@@ -126,9 +126,24 @@ CNetworkReply::CNetworkReply( QObject *parent, const QNetworkRequest &req, const
 
 		} // end if
 
-		else
-			setAttribute( QNetworkRequest::HttpStatusCodeAttribute, QVariant( 404 ) );
+		else{
 
+			// find is in the current path
+			QFile resFile("."+path);
+			
+
+			if(!resFile.open(QIODevice::ReadOnly)) {
+				setAttribute( QNetworkRequest::HttpStatusCodeAttribute, QVariant( 404 ) );
+			}else{
+				setAttribute( QNetworkRequest::HttpStatusCodeAttribute, QVariant( 200 ) );
+				mime = disk::GetMimeType( full );
+
+				QTextStream instream(&resFile);
+				QString content = instream.readAll();
+				m_content.append(content);
+			}
+			resFile.close();
+		}
 	} // end if
 
 	else
@@ -264,8 +279,8 @@ QNetworkReply* CNetworkMgr::createRequest( QNetworkAccessManager::Operation op, 
 		return new CNetworkReply( this, req, op, post, file, payload );
 	}
 
-	return new CNetworkReply( this, req, op, post, file , payload );
+	// return new CNetworkReply( this, req, op, post, file , payload );
 	
 	// This could be enabled to allow network access
-	// return QNetworkAccessManager::createRequest( op, req, device );
+	return QNetworkAccessManager::createRequest( op, req, device );
 }
