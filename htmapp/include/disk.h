@@ -177,6 +177,8 @@ namespace disk
 			else if ( sExt == tcTT( T, "html" ) ) return tcTT( T, "text/html" );
 			else if ( sExt == tcTT( T, "css" ) ) return tcTT( T, "text/css" );
 			else if ( sExt == tcTT( T, "txt" ) ) return tcTT( T, "text/plain" );
+			else if ( sExt == tcTT( T, "js" ) ) return tcTT( T, "text/javascript" );
+			else if ( sExt == tcTT( T, "svg" ) ) return tcTT( T, "text/ecmascript" );
 			else return tcTT( T, "application/octet-stream" );
 		}
 
