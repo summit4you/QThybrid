@@ -1,0 +1,136 @@
+<?global
+
+	#include <QDir>
+	#include <QFileDialog>
+	#include <QTextStream>
+	#include <QMessageBox>
+	#include <QIODevice>
+	#include<QtDebug>
+	#include <QTextCodec>
+
+	#include "json.h"
+
+	QStringList files;
+
+
+	void getAllFileinDir(QString path, QStringList ext)
+	{
+		
+		QDir currentDir = QDir(path);
+		
+		QFileInfoList list = currentDir.entryInfoList( QDir::Dirs | QDir::NoDotAndDotDot);
+
+		for(int i=0; i<list.count(); i++)
+		{
+			QDir dir(list[i].absoluteFilePath());
+			dir.setNameFilters(ext);
+			QStringList fls = dir.entryList(QDir::Files, QDir::Name);
+			for (int j=0; j<fls.count(); j++)
+			{
+				files.append(dir.absoluteFilePath(fls[j]));
+			}
+			
+		}
+
+		currentDir.setNameFilters(ext);
+		QStringList fls = currentDir.entryList(QDir::Files, QDir::Name);
+		for (int j=0; j<fls.count(); j++)
+		{
+			files.append(currentDir.absoluteFilePath(fls[j]));
+		}
+
+		
+	}
+
+?>
+
+<?c
+	
+	
+	std::map<string, string> values;
+
+	if (!strcmp(in["GET"]["op"],"dir"))
+	{
+
+		QTextCodec::setCodecForTr(QTextCodec::codecForName("gbk"));
+		QString path = QFileDialog::getExistingDirectory (NULL, QObject::tr("选择目录"));
+		QTextCodec::setCodecForTr(QTextCodec::codecForName("utf-8"));
+
+		
+		QVariantMap map;
+		map["success"] = true;
+		map["path"] = path;
+
+		
+
+		out << QtJson::serialize(map).data(); 
+
+	}else if(!strcmp(in["GET"]["op"],"replace")){
+		
+		
+
+		QVariantMap map;
+		map["success"] = true;
+
+		QString filter = in["GET"]["filter"].c_str();
+		files.clear();
+		QStringList exts;
+		if (!filter.isEmpty())
+			exts = filter.split(";");
+		for (int i=0; i<exts.count(); i++)
+		{
+			exts[i] = "*."+exts[i];
+		}
+		QString path = in["GET"]["path"].c_str();
+		
+		
+
+		if (path.isEmpty()){
+			QTextCodec::setCodecForTr(QTextCodec::codecForName("gbk"));
+			map["msg"] =  QObject::tr("请设置路径");
+			QTextCodec::setCodecForTr(QTextCodec::codecForName("utf-8"));
+			
+		}
+		else{
+			getAllFileinDir(in["GET"]["path"].c_str(), exts);
+			for(int i=0; i<files.count(); i++)
+			{
+					
+					qDebug() << files[i] ;
+
+					QFile resFile(files[i]);
+
+					if (resFile.open(QIODevice::ReadWrite))
+					{
+						QTextStream stream(&resFile);
+						QString content = stream.readAll();
+						QString before(in["GET"]["before"].c_str()), after(in["GET"]["after"].c_str());
+					
+						if (content.indexOf(before)<0)continue;
+						else{
+							content.replace(before, after);
+							resFile.seek(0);
+							resFile.write(content.toLocal8Bit());
+							resFile.resize(resFile.pos());
+						}
+					}
+
+
+			}
+			QTextCodec::setCodecForTr(QTextCodec::codecForName("gbk"));
+			map["msg"] = QObject::tr("替换成功"); 
+			QTextCodec::setCodecForTr(QTextCodec::codecForName("utf-8"));
+		
+		}
+		
+		
+		
+
+		out << QtJson::serialize(map).data(); 
+	}else{
+		out << csp_template("tpl/index.htm", values);
+	}
+
+	
+
+?>

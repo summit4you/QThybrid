@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+  <head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <title>批量替换文件</title>
+    <!-- Bootstrap -->
+    <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+  </head>
+  <body>
+    <div class="container">
+		<div>
+			<h1>替换助手UTF-8版本,使用说明</h1>
+			<p><ol>
+			  <li>点击“选择目录”，选择要替换的目录</li>
+			  <li>填写查找的字符串</li>
+			  <li>填写替换的字符串</li>
+			  <li>点击生成替换</li>
+			</ol></p>
+		</div>
+
+		<div>
+			<form class="form-search form-horizontal">
+
+				
+			  
+				<div class="control-group">
+				
+				  <div class="controls">
+					<input id="path" type="txt"  value=""><button  class="btn" id="toggle-dirpath" data-toggle="button">打开目录</button>
+				  </div>
+				 
+				 </div>
+				
+				 <div class="control-group">
+				<label class="control-label" for="filter">过滤文件</label>
+					<div class="controls">
+					  <input type="text" id="filter" placeholder="php;htm;">
+					</div>
+				</div>
+
+				 <div class="control-group">
+				<label class="control-label" for="before">查找字符串</label>
+					<div class="controls">
+					  <input type="text" id="before" placeholder="打赌">
+					</div>
+				</div>
+
+				<div class="control-group">
+				<label class="control-label" for="before">替换字符串</label>
+					<div class="controls">
+					  <input type="text" id="after" placeholder="竞猜">
+					</div>
+				</div>
+
+				
+
+				<div class="form-actions">
+				  <button class="btn btn-primary"  id="toggle-replace" data-toggle="button">替换</button>
+				  
+				</div>
+			</form>
+		</div>
+
+		<div>
+			<address>
+			  <strong>作者:summit</strong><br>
+			  <a href="mailto:#">summit_mail@qq.com</a>
+			</address>
+		</div>
+
+		
+	</div>
+    <script src="js/jquery-latest.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+	<script src="js/bootbox.min.js"></script>
+	<script src="js/main.js"></script>
+  </body>
+</html>
