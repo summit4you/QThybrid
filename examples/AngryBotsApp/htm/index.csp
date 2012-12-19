@@ -1,0 +1,17 @@
+<?global
+
+	
+
+?>
+
+<?c
+	
+	
+	std::map<string, string> values;
+
+
+	out << csp_template("tpl/index.htm", values);
+	
+
+
+?>

@@ -1,0 +1,63 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>Power QThybrid for Unity3D</title>
+		<style type="text/css">
+		body {
+			text-align:center;
+			background-color: black;
+			overflow:hidden;
+		}
+		body, object, embed, a {
+			padding:0;
+			margin:0;
+			outline-width:0;
+			color: white;
+		}
+		#missing {
+			padding-top: 250px;
+			height:400px;
+			background-position: center top;
+			background-repeat: no-repeat;
+			background-image: url(http://dat.marsxplr.com/player/bg.jpg);
+		}
+		</style>
+		<script type="text/javascript" src="http://webplayer.unity3d.com/download_webplayer-3.x/3.0/uo/UnityObject.js"></script>
+		<script type="text/javascript">
+		<!--
+		function GetUnity() {
+			if (typeof unityObject != "undefined") {
+				return unityObject.getObjectById("unityPlayer");
+			}
+			return null;
+		}
+		if (typeof unityObject != "undefined") {
+			var params = {
+				backgroundcolor: "000000",
+				bordercolor: "000000",
+				textcolor: "FFFFFF",
+				logoimage: "http://dat.marsxplr.com/player/ldl.png",
+				progressbarimage: "http://dat.marsxplr.com/player/ldp.png",
+				progressframeimage: "http://dat.marsxplr.com/player/ldb.png"
+			};
+			unityObject.embedUnity("unityPlayer", "angrybots.thybrid", "100%", "100%", params);
+		}
+		-->
+		</script>
+		
+	</head>
+	<body>
+		
+		<div class="content">
+			<div id="unityPlayer">
+				<div class="missing">
+					<a href="http://unity3d.com/webplayer/" title="Unity Web Player. Install now!">
+						<img alt="Unity Web Player. Install now!" src="http://webplayer.unity3d.com/installation/getunity.png" width="193" height="63" />
+					</a>
+				</div>
+			</div>
+		</div>
+		
+	</body>
+</html>
