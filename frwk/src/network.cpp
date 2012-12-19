@@ -49,7 +49,7 @@ CNetworkReply::CNetworkReply( QObject *parent, const QNetworkRequest &req, const
 	m_content.clear();
 
 	// Get the path to the file
-	QByteArray path = req.url().path().toUtf8();
+ 	QByteArray path = req.url().path().toUtf8();
 
 	str::t_string8 mime = "application/octet-stream";
 	str::t_string8 full = 
@@ -138,8 +138,9 @@ CNetworkReply::CNetworkReply( QObject *parent, const QNetworkRequest &req, const
 				setAttribute( QNetworkRequest::HttpStatusCodeAttribute, QVariant( 200 ) );
 				mime = disk::GetMimeType( full );
 
-				QTextStream instream(&resFile);
-				QString content = instream.readAll();
+				//QTextStream instream(&resFile);
+				//QString content = instream.readAll();
+				QByteArray content = resFile.readAll();
 				m_content.append(content);
 			}
 			resFile.close();
